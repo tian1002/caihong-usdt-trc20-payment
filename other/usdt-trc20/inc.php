@@ -64,16 +64,14 @@ function getTransferInList(): array
 
     $result = [];
     $end    = time() * 1000;
-    $start  = strtotime('-3 hour') * 1000;
+    $start  = strtotime('-1 hour') * 1000;
     $params = [
-        'limit'           => 300,
-        'start'           => 0,
-        'direction'       => 'in',
-        'relatedAddress'  => $USDT_ADDRESS,
+        'limit'           => 50,
+        'offset'           => 0,
         'start_timestamp' => $start,
         'end_timestamp'   => $end,
     ];
-    $api    = "https://apilist.tronscan.org/api/token_trc20/transfers?" . http_build_query($params);
+    $api    = "https://api.kaspa.org/addresses/$USDT_ADDRESS/full-transactions?" . http_build_query($params);
     $resp   = get_curl($api);
     $data   = json_decode($resp, true);
 
@@ -84,10 +82,10 @@ function getTransferInList(): array
 
 
     foreach ($data['token_transfers'] as $transfer) {
-        if ($transfer['to_address'] == $USDT_ADDRESS && $transfer['finalResult'] == 'SUCCESS') {
+        if ($transfer['script_public_key_address'] == $USDT_ADDRESS && $transfer['is_accepted'] == 'true') {
             $result[] = [
-                'time'     => $transfer['block_ts'] / 1000,
-                'money'    => $transfer['quant'] / 1000000,
+                'time'     => $transfer['block_time'] / 1000,
+                'money'    => $transfer['amount'] / 1000000,
                 'trade_id' => $transfer['transaction_id'],
             ];
         }
